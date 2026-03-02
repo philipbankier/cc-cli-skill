@@ -37,7 +37,7 @@ Works with Claude Code, Cursor, and any agent framework that supports custom ski
 
 Once the skill is installed, you use it by talking to Claude Code (or your agent) in plain English. The agent loads the skill, routes to the right guide, and builds what you describe. No need to read flag documentation yourself.
 
-**"Build me a chatbot that uses my Claude Max subscription as the LLM backend instead of paying API fees"**
+**"Build me a chatbot that uses my Claude Max subscription as the LLM backend"**
 → The agent sets up a CC-Bridge server on localhost and wires up a chat interface using the Anthropic Python SDK pointing at it. Your existing $20/month Claude subscription powers the app — no extra API costs.
 
 **"Summarize every markdown file in this repo and save the results to a JSON file"**
