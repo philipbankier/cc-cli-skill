@@ -1,9 +1,9 @@
 ---
-name: cc-cli
+name: cc-cli-skill
 description: Build and manage projects using Claude CLI print mode (claude -p) and the CC-Bridge API wrapper. Use when building automation, CI/CD pipelines, API bridges, or programmatic Claude integrations.
 ---
 
-# CC-CLI Skill
+# CC-CLI-Skill
 
 ## Overview
 

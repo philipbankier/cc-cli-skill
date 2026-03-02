@@ -1,5 +1,5 @@
 ---
-name: cc-cli
+name: cc-cli-skill
 triggers:
   - keyword: claude -p
   - keyword: print mode
@@ -15,7 +15,7 @@ dependencies:
   - claude-code
 ---
 
-# CC-CLI: Claude Code Print Mode & API Bridge
+# CC-CLI-Skill: Claude Code Print Mode & API Bridge
 
 This skill teaches how to use `claude -p` (print mode) for programmatic automation and how to build API-compatible bridge servers using CC-Bridge.
 
@@ -53,8 +53,8 @@ This skill teaches how to use `claude -p` (print mode) for programmatic automati
 
 ## Full Skill
 
-For comprehensive guides and reference, load the cc-cli skill folder:
+For comprehensive guides and reference, load the cc-cli-skill skill folder:
 
-- **Entry point:** `cc-cli/SKILL.md` — overview, decision routing, quick-start recipes
-- **Guides:** `cc-cli/guides/automate-cli.md`, `build-bridge.md`, `integrate-sdk.md`
-- **Reference:** `cc-cli/reference/print-mode-flags.md`, `streaming-events.md`, `json-schemas.md`, `code-snippets.md`
+- **Entry point:** `cc-cli-skill/SKILL.md` — overview, decision routing, quick-start recipes
+- **Guides:** `cc-cli-skill/guides/automate-cli.md`, `build-bridge.md`, `integrate-sdk.md`
+- **Reference:** `cc-cli-skill/reference/print-mode-flags.md`, `streaming-events.md`, `json-schemas.md`, `code-snippets.md`

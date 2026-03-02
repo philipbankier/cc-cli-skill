@@ -1,4 +1,4 @@
-# Contributing to cc-cli
+# Contributing to cc-cli-skill
 
 Thanks for your interest in contributing!
 

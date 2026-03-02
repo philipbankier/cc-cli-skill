@@ -1,4 +1,4 @@
-# cc-cli
+# cc-cli-skill
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-skill-blue)](https://docs.anthropic.com/en/docs/claude-code)
@@ -17,7 +17,7 @@ A **skill** is a structured knowledge package that AI agents load on demand. Thi
 
 Works with Claude Code, Cursor, and any agent framework that supports custom skills.
 
-## Why cc-cli?
+## Why cc-cli-skill?
 
 1. **`claude -p` is underdocumented** — 30+ flags with non-obvious interactions. This skill maps the flag matrix with 31 tested combinations so your agent gets it right the first time.
 
@@ -98,7 +98,7 @@ See the full annotated walkthrough: [`examples/debate-engine/WALKTHROUGH.md`](ex
 
 ```bash
 # Add to your project's skill directory
-git clone https://github.com/philipbankier/cc-cli.git .claude/skills/cc-cli
+git clone https://github.com/philipbankier/cc-cli-skill.git .claude/skills/cc-cli-skill
 ```
 
 Your agent will automatically discover and use the skill when it encounters relevant tasks.
@@ -106,13 +106,13 @@ Your agent will automatically discover and use the skill when it encounters rele
 **Option 2: Clone standalone**
 
 ```bash
-git clone https://github.com/philipbankier/cc-cli.git
+git clone https://github.com/philipbankier/cc-cli-skill.git
 ```
 
 ## Project Structure
 
 ```
-cc-cli/
+cc-cli-skill/
 ├── SKILL.md                          # Entry point — decision routing, quick recipes
 ├── guides/
 │   ├── automate-cli.md               # CLI automation, CI/CD, scripting

@@ -13,7 +13,7 @@ prompt, producing validated JSON output. The Moderator receives all five outputs
 produces a final synthesis -- either streamed in real time or as structured JSON.
 
 **Why this example matters:** It demonstrates the core techniques from the
-[cc-cli skill](../../SKILL.md) in a realistic multi-agent pipeline:
+[cc-cli-skill skill](../../SKILL.md) in a realistic multi-agent pipeline:
 
 - Batch processing with parallel execution
 - Structured output via `--json-schema`
@@ -340,12 +340,12 @@ handling and composability, or when you are already working in a Python codebase
 
 ---
 
-## cc-cli Techniques Demonstrated
+## cc-cli-skill Techniques Demonstrated
 
-This table maps every technique used in the debate engine back to the cc-cli skill
+This table maps every technique used in the debate engine back to the cc-cli-skill skill
 reference files.
 
-| Technique | Bash Flag / Pattern | Python SDK Equivalent | cc-cli Reference |
+| Technique | Bash Flag / Pattern | Python SDK Equivalent | cc-cli-skill Reference |
 |-----------|--------------------|-----------------------|-----------------|
 | Non-interactive mode | `claude -p` | SDK `client.messages.create()` | [SKILL.md](../../SKILL.md) |
 | System prompts | `--append-system-prompt` | `system=` parameter | [guides/automate-cli.md](../../guides/automate-cli.md) |

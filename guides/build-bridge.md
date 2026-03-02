@@ -1,4 +1,4 @@
-> Part of the [cc-cli](../SKILL.md) skill.
+> Part of the [cc-cli-skill](../SKILL.md) skill.
 
 # Build an API-Compatible Bridge Server
 
