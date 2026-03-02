@@ -12,6 +12,11 @@
 # ============================================================================
 set -euo pipefail
 
+# --- Environment Setup -------------------------------------------------------
+# Unset CLAUDECODE to allow running claude -p from within a Claude Code session
+# (Claude Code sets this env var to prevent accidental nested sessions)
+unset CLAUDECODE 2>/dev/null || true
+
 # --- Argument Parsing -------------------------------------------------------
 
 STREAM=false
@@ -93,13 +98,13 @@ PERSPECTIVES_MAP=(
 for NAME in optimist skeptic historian futurist practitioner; do
   PROMPT="${PERSPECTIVES_MAP[$NAME]}"
   echo "  Spawning $NAME agent..."
-  claude -p "Analyze this topic from your unique perspective: $TOPIC" \
+  echo "Analyze this topic from your unique perspective: $TOPIC" | \
+    claude -p \
     --append-system-prompt "$PROMPT" \
     --output-format json \
     --json-schema "$PERSPECTIVE_SCHEMA" \
     --model "$MODEL" \
     --no-session-persistence \
-    --max-budget-usd 0.30 \
     --tools "" \
     > "$TMPDIR/$NAME.json" &
 done
@@ -113,20 +118,40 @@ echo ""
 # --- Collect Perspectives ----------------------------------------------------
 
 PERSPECTIVES=""
+ERRORS=0
 for f in "$TMPDIR"/*.json; do
-  perspective=$(jq -r '.structured_output | tojson' "$f")
-  PERSPECTIVES="$PERSPECTIVES\n$perspective"
+  NAME=$(basename "$f" .json)
+  # Check for errors or missing output
+  if jq -e '.type == "error"' "$f" > /dev/null 2>&1; then
+    echo "  WARNING: $NAME failed ($(jq -r '.subtype // "unknown error"' "$f"))" >&2
+    ERRORS=$((ERRORS + 1))
+    continue
+  fi
+  # Try structured_output first, fall back to result text
+  perspective=$(jq -r '.structured_output // empty | tojson' "$f" 2>/dev/null)
+  if [[ -z "$perspective" || "$perspective" == "null" ]]; then
+    perspective=$(jq -r '.result // "No output"' "$f" 2>/dev/null)
+  fi
+  PERSPECTIVES="${PERSPECTIVES}${perspective}"$'\n\n'
 done
 
-# --- Build Moderator Prompt --------------------------------------------------
+if [[ $ERRORS -eq 5 ]]; then
+  echo "ERROR: All perspectives failed. Check that 'claude' is installed and try a cheaper model." >&2
+  exit 1
+fi
 
-MODERATOR_PROMPT="You are The Moderator. You have received arguments from 5 different perspectives on the topic: '$TOPIC'.
+# --- Build Moderator Prompt (written to file to avoid arg length limits) -----
+
+MODERATOR_FILE="$TMPDIR/moderator-prompt.txt"
+cat > "$MODERATOR_FILE" <<PROMPT_EOF
+You have received arguments from 5 different perspectives on the topic: '$TOPIC'.
 
 Here are their positions:
 
 $PERSPECTIVES
 
-Synthesize these viewpoints into a balanced analysis. Identify areas of consensus, key disagreements, and provide a nuanced verdict."
+Synthesize these viewpoints into a balanced analysis. Identify areas of consensus, key disagreements, and provide a nuanced verdict.
+PROMPT_EOF
 
 # --- Run Moderator -----------------------------------------------------------
 
@@ -137,7 +162,7 @@ if [[ "$STREAM" == true ]]; then
   echo "  MODERATOR'S SYNTHESIS (streaming)"
   echo "======================================="
   echo ""
-  claude -p "$MODERATOR_PROMPT" \
+  cat "$MODERATOR_FILE" | claude -p \
     --append-system-prompt "You are a balanced, thoughtful moderator. Synthesize all perspectives fairly." \
     --output-format stream-json \
     --verbose \
@@ -157,7 +182,7 @@ else
   echo "  MODERATOR'S SYNTHESIS"
   echo "======================================="
   echo ""
-  claude -p "$MODERATOR_PROMPT" \
+  cat "$MODERATOR_FILE" | claude -p \
     --append-system-prompt "You are a balanced, thoughtful moderator. Synthesize all perspectives fairly." \
     --output-format json \
     --json-schema "$SYNTHESIS_SCHEMA" \

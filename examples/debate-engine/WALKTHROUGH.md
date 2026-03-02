@@ -116,7 +116,6 @@ for NAME in optimist skeptic historian futurist practitioner; do
     --json-schema "$PERSPECTIVE_SCHEMA" \
     --model "$MODEL" \
     --no-session-persistence \
-    --max-budget-usd 0.30 \
     --tools "" \
     > "$TMPDIR/$NAME.json" &
 done
@@ -135,7 +134,6 @@ execution -- no framework, no queue, just the shell's built-in job control.
 | `--output-format json` | Returns a JSON object with `.result`, `.structured_output`, `.total_cost_usd` |
 | `--json-schema` | Validates output against the schema; result lands in `.structured_output` |
 | `--no-session-persistence` | Stateless -- no session file written to disk (critical for batch jobs) |
-| `--max-budget-usd 0.30` | Cost cap per perspective; the call aborts if it would exceed this |
 | `--tools ""` | Disables all tool access -- pure LLM reasoning, no file system or shell |
 | `--model sonnet` | Model selection using the short alias (equivalent to `claude-sonnet-4-20250514`) |
 
@@ -357,7 +355,6 @@ reference files.
 | Token streaming | `--include-partial-messages` | `stream.text_stream` | [reference/streaming-events.md](../../reference/streaming-events.md) |
 | Model selection | `--model sonnet` | `model=` parameter | [reference/print-mode-flags.md](../../reference/print-mode-flags.md) |
 | Stateless mode | `--no-session-persistence` | N/A (bridge handles it) | [guides/automate-cli.md](../../guides/automate-cli.md) |
-| Cost cap | `--max-budget-usd 0.30` | N/A | [guides/automate-cli.md](../../guides/automate-cli.md) |
 | Disable tools | `--tools ""` | N/A | [guides/automate-cli.md](../../guides/automate-cli.md) |
 | Parallel agents | `&` + `wait` | `ThreadPoolExecutor` | [reference/code-snippets.md](../../reference/code-snippets.md) |
 | CC-Bridge SDK | N/A | `base_url="http://localhost:8321"` | [guides/integrate-sdk.md](../../guides/integrate-sdk.md) |
@@ -406,4 +403,4 @@ python debate.py --base-url http://localhost:9000 "Some topic"
 - 5 perspective agents + 1 moderator = 6 `claude -p` calls per debate
 - With Sonnet: approximately $0.70-1.00 per debate
 - With Haiku: approximately $0.10-0.15 per debate
-- The `--max-budget-usd 0.30` cap on each perspective agent prevents runaway costs
+- Use `--max-budget-usd` on individual agents if you want to cap costs (see [guides/automate-cli.md](../../guides/automate-cli.md))

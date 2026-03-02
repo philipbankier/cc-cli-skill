@@ -1,56 +1,154 @@
 # cc-cli
 
-AI agent skill for Claude CLI print mode (`claude -p`) and CC-Bridge API wrapper.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-skill-blue)](https://docs.anthropic.com/en/docs/claude-code)
 
-## What This Skill Does
+**Teach your AI agent to automate Claude Code — from one-shot scripts to multi-agent orchestration.**
 
-Teaches AI agents (Claude Code, OpenClaw, or any agent supporting standardized skills) how to:
+Claude Code's interactive TUI is great for humans, but agents and scripts need programmatic access. The `claude -p` print mode has 30+ flags with non-obvious interactions — `stream-json` silently fails without `--verbose`, `--system-prompt` replaces defaults instead of appending, and structured output lands in `.structured_output` not `.result`. This skill packages the flag matrix, the gotchas, and production-ready patterns so your agent doesn't have to discover them by trial and error.
 
-- **Automate with CLI** — Use `claude -p` for scripting, CI/CD, and batch processing
-- **Build API bridges** — Wrap `claude -p` as an Anthropic-compatible HTTP endpoint
-- **Integrate SDKs** — Point existing Anthropic Python/JS SDKs at a local bridge
+## What is a "Skill"?
 
-## Structure
+A **skill** is a structured knowledge package that AI agents load on demand. Think of it as documentation optimized for AI consumption — with a decision router, copy-paste recipes, and cross-linked references — though humans can read it too.
 
-```
-cc-cli/
-├── SKILL.md                  # Entry point — overview, decision routing, quick recipes
-├── guides/
-│   ├── automate-cli.md       # CLI automation, CI/CD, scripting
-│   ├── build-bridge.md       # CC-Bridge architecture & implementation
-│   └── integrate-sdk.md      # Python/JS SDK integration
-├── reference/
-│   ├── print-mode-flags.md   # Complete flag reference (31 tested combinations)
-│   ├── streaming-events.md   # SSE events, NDJSON, stream consumers
-│   ├── json-schemas.md       # Output shapes, error formats, usage tracking
-│   └── code-snippets.md      # Bash, Python, JS, Go, CI/CD patterns
-└── autopilot-adapter.md      # autopilot-hq triggers/dependencies adapter
-```
+- Entry point: `SKILL.md` (YAML frontmatter with `name` and `description`)
+- Agents load the skill when they encounter relevant tasks (CLI automation, API bridges, etc.)
+- The skill's decision router directs agents to the right guide for each situation
+
+Works with Claude Code, Cursor, and any agent framework that supports custom skills.
+
+## Why cc-cli?
+
+1. **`claude -p` is underdocumented** — 30+ flags with non-obvious interactions. This skill maps the flag matrix with 31 tested combinations so your agent gets it right the first time.
+
+2. **No native HTTP API for Claude Code** — [CC-Bridge](https://github.com/ranaroussi/cc-bridge) turns `claude -p` into an Anthropic-compatible REST endpoint, but setup patterns are scattered. This skill consolidates them.
+
+3. **Agents need recipes, not man pages** — LLMs work better with decision routers and copy-paste patterns than with exhaustive reference docs. This skill is structured for agent consumption.
+
+## The Three Pillars
+
+| Pillar | What it does | Guide |
+|--------|-------------|-------|
+| **CLI Automation** | Use `claude -p` for scripting, CI/CD, batch processing | [`guides/automate-cli.md`](guides/automate-cli.md) |
+| **CC-Bridge** | Wrap `claude -p` as an Anthropic-compatible HTTP API | [`guides/build-bridge.md`](guides/build-bridge.md) |
+| **SDK Integration** | Point Anthropic Python/JS/Go SDKs at a local bridge | [`guides/integrate-sdk.md`](guides/integrate-sdk.md) |
 
 ## Quick Start
 
 ```bash
-# Simple CLI automation
+# One-shot CLI call
 claude -p "Summarize this code" < main.py
 
-# JSON output for parsing
-claude -p "Analyze this" --output-format json < data.csv | jq '.result'
+# Structured JSON output with schema validation
+claude -p "Extract function names" \
+  --output-format json \
+  --json-schema '{"type":"object","properties":{"functions":{"type":"array","items":{"type":"string"}}},"required":["functions"]}' \
+  < main.py | jq '.structured_output'
 
 # Real-time streaming
-claude -p "Explain this" --output-format stream-json --verbose --include-partial-messages
+claude -p "Explain this" \
+  --output-format stream-json \
+  --verbose \
+  --include-partial-messages
 
-# Point Python SDK at a CC-Bridge
+# Python SDK via CC-Bridge (zero code changes from direct API usage)
 import anthropic
 client = anthropic.Anthropic(api_key="dummy", base_url="http://localhost:8321")
+msg = client.messages.create(
+    model="sonnet", max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello!"}]
+)
 ```
 
-## Sources
+## Flagship Example: Multi-Perspective Debate Engine
 
-- [CC-Bridge](https://github.com/ranaroussi/cc-bridge) by Ran Aroussi — Go server wrapping `claude -p`
+The debate engine spawns 5 AI "debaters" in parallel — Optimist, Skeptic, Historian, Futurist, and Practitioner — each with their own persona and JSON schema. A Moderator then synthesizes the arguments into a balanced analysis. Available in both Bash (zero dependencies beyond `jq`) and Python (via CC-Bridge SDK).
+
+```bash
+# Structured JSON output
+./examples/debate-engine/debate.sh "Should AI replace teachers?"
+
+# Streaming moderator synthesis
+./examples/debate-engine/debate.sh --stream "Should AI replace teachers?"
+```
+
+**Sample verdict** (from `examples/debate-engine/sample-output/ai-teachers.json`):
+
+> AI should not replace teachers but should be systematically integrated into education as a powerful tool that handles personalized practice, immediate feedback, and administrative tasks. Human teachers should be repositioned as learning architects, mentors, and community builders — roles that become more important, not less, in an AI-augmented world.
+
+**Techniques demonstrated:**
+- Parallel agent execution with `&` + `wait`
+- Structured output via `--json-schema`
+- Streaming with NDJSON parsing
+- System prompts for agent personas (`--append-system-prompt`)
+- Cost tracking across all calls
+
+See the full annotated walkthrough: [`examples/debate-engine/WALKTHROUGH.md`](examples/debate-engine/WALKTHROUGH.md)
+
+## Installation
+
+**Prerequisites:**
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code): `npm install -g @anthropic-ai/claude-code`
+- Authenticated: `claude auth status` should show authenticated
+- For Bash examples: [`jq`](https://jqlang.github.io/jq/) (JSON processor)
+- For Python examples: `pip install anthropic`
+- For CC-Bridge: Go 1.21+ and the compiled `ccbridge` binary (see [`guides/build-bridge.md`](guides/build-bridge.md))
+
+**Option 1: Add as a Claude Code skill (recommended)**
+
+```bash
+# Add to your project's skill directory
+git clone https://github.com/philipbankier/cc-cli.git .claude/skills/cc-cli
+```
+
+Your agent will automatically discover and use the skill when it encounters relevant tasks.
+
+**Option 2: Clone standalone**
+
+```bash
+git clone https://github.com/philipbankier/cc-cli.git
+```
+
+## Project Structure
+
+```
+cc-cli/
+├── SKILL.md                          # Entry point — decision routing, quick recipes
+├── guides/
+│   ├── automate-cli.md               # CLI automation, CI/CD, scripting
+│   ├── build-bridge.md               # CC-Bridge architecture & implementation
+│   └── integrate-sdk.md              # Python/JS/Go SDK integration
+├── reference/
+│   ├── print-mode-flags.md           # Complete flag reference (31 tested combinations)
+│   ├── streaming-events.md           # SSE events, NDJSON, stream consumers
+│   ├── json-schemas.md               # Output shapes, error formats, usage tracking
+│   └── code-snippets.md              # Bash, Python, JS, Go, CI/CD patterns
+├── examples/
+│   └── debate-engine/
+│       ├── debate.sh                 # Bash version (zero dependencies beyond jq)
+│       ├── debate.py                 # Python version (CC-Bridge + Anthropic SDK)
+│       ├── WALKTHROUGH.md            # Annotated deep-dive
+│       └── sample-output/
+│           └── ai-teachers.json      # Full sample output
+├── autopilot-adapter.md              # autopilot-hq triggers & dependencies
+├── CONTRIBUTING.md
+├── LICENSE
+└── .gitignore
+```
+
+## Contributing
+
+Contributions welcome! See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.
+
+Most valuable contributions: new multi-agent examples, flag documentation updates as Claude CLI evolves, and code snippets in additional languages.
+
+## Sources & Credits
+
+- [CC-Bridge](https://github.com/ranaroussi/cc-bridge) by Ran Aroussi — Go server wrapping `claude -p` as an Anthropic-compatible API
 - [Print Mode State Machine](https://gist.github.com/danialhasan/abbf1d7e721475717e5d07cee3244509) by Danial Hasan — Comprehensive CLI flag testing
 - Original idea by [@dhasandev](https://x.com/dhasandev)
+- [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code) by Anthropic
 
-## Formats
+## License
 
-- **Claude Code format** — `SKILL.md` with standard YAML frontmatter (`name`, `description`)
-- **autopilot-hq format** — `autopilot-adapter.md` with triggers and dependencies
+MIT — see [`LICENSE`](LICENSE).
