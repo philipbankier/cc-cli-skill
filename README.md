@@ -33,7 +33,28 @@ Works with Claude Code, Cursor, and any agent framework that supports custom ski
 | **CC-Bridge** | Wrap `claude -p` as an Anthropic-compatible HTTP API | [`guides/build-bridge.md`](guides/build-bridge.md) |
 | **SDK Integration** | Point Anthropic Python/JS/Go SDKs at a local bridge | [`guides/integrate-sdk.md`](guides/integrate-sdk.md) |
 
-## Quick Start
+## What You Can Build — Just Ask
+
+Once the skill is installed, you use it by talking to Claude Code (or your agent) in plain English. The agent loads the skill, routes to the right guide, and builds what you describe. No need to read flag documentation yourself.
+
+**"Build me a chatbot that uses my Claude Max subscription as the LLM backend instead of paying API fees"**
+→ The agent sets up a CC-Bridge server on localhost and wires up a chat interface using the Anthropic Python SDK pointing at it. Your existing $20/month Claude subscription powers the app — no extra API costs.
+
+**"Summarize every markdown file in this repo and save the results to a JSON file"**
+→ The agent writes a shell script that pipes each file through `claude -p` with structured JSON output and aggregates the results — runs in seconds.
+
+**"Add an AI code review step to our GitHub Actions pipeline"**
+→ The agent writes a workflow that calls `claude -p` on each PR diff, outputs structured findings as JSON, and posts them as PR comments.
+
+**"Build a tool that gets multiple AI perspectives on any topic and synthesizes them"**
+→ The agent writes a parallel orchestration script — 5 debaters running simultaneously, each with their own persona, synthesized by a moderator. (See the included [debate engine example](examples/debate-engine/WALKTHROUGH.md).)
+
+**"I have a Python app using the Anthropic SDK — make it work with my local Claude Code auth instead of an API key"**
+→ The agent sets up CC-Bridge and changes one line in your existing code: `base_url="http://localhost:8321"`. Everything else stays the same.
+
+## Under the Hood
+
+What the agent generates and uses — raw `claude -p` patterns for reference:
 
 ```bash
 # One-shot CLI call
