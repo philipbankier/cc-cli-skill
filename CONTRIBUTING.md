@@ -36,3 +36,7 @@ Open a GitHub issue for:
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
+
+## Legal Note
+
+Please ensure any contributions comply with Anthropic's usage policies. This project documents community-discovered patterns; contributors are responsible for validating compliance with current Anthropic terms before deploying in production.

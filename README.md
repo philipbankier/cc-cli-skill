@@ -142,6 +142,20 @@ Contributions welcome! See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.
 
 Most valuable contributions: new multi-agent examples, flag documentation updates as Claude CLI evolves, and code snippets in additional languages.
 
+## Disclaimer
+
+> **This is an independent community project and is not affiliated with, endorsed by, or approved by Anthropic.** Use at your own risk.
+
+A few things to be aware of:
+
+- **Terms of Service** — Using `claude -p` for automation and CC-Bridge for local API serving may be subject to Anthropic's [Usage Policy](https://www.anthropic.com/legal/aup) and [Claude Code terms](https://www.anthropic.com/legal/claude-code-terms). Review these before deploying in production or commercial contexts.
+
+- **CC-Bridge specifically** — The bridge proxies Claude Code's CLI authentication to serve API requests from other apps. This is a community pattern, not an officially supported Anthropic integration. Anthropic may change the CLI interface or auth model at any time.
+
+- **`unset CLAUDECODE`** — The nested-call workaround bypasses a guard Anthropic intentionally put in place. Use it only in sandboxed, controlled environments.
+
+- **No stability guarantees** — The `claude -p` CLI interface is undocumented and can change between Claude Code versions without notice.
+
 ## Sources & Credits
 
 - [CC-Bridge](https://github.com/ranaroussi/cc-bridge) by Ran Aroussi — Go server wrapping `claude -p` as an Anthropic-compatible API
